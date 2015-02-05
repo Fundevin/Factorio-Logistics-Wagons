@@ -87,7 +87,7 @@ end)
 
 game.onevent(defines.events.onbuiltentity, function(event)
 	if isKnownWagon(event.createdentity.name) then
-		--event.createdentity.operable = false
+		createProxies(event.createdentity, {}) --glob.wagonsData["requestSlots"]
 		addWagonToTable(glob.wagonsData, event.createdentity)
 	end
 end)
@@ -109,7 +109,6 @@ function addWagonToTable(wagonsData, wagon) --, proxyPosition)
 	end
 	
 	if wagon ~= nil and wagon.valid then
-		
 		local newWagon = {}
 		newWagon["wagon"] = wagon
 		newWagon["position"] = wagon.position
@@ -371,11 +370,11 @@ function initWagonsData(wagonsData)
 		for i, wagonData in ipairs(wagonsData) do
 			local newValues = {}
 			if wagonData.wagon.valid then
-				debugLog("Wagon is valid " .. i)
+				debugLog("Wagon " .. i .. " is valid ")
 				-- table.insert(newWagons,wadonData)
 				addWagonToTable(newWagons, wagonData.wagon)
 			else
-				debugLog("Wagon is invalid. " .. i)
+				debugLog("Wagon " .. i .. " is invalid. ")
 				if wagonData["position"] ~= nil then
 					cleanOldProxies(wagonData.proxyPosition)
 					local newWagon = findWagonAtPosition(wagonData["position"])
@@ -454,13 +453,13 @@ function processWagon(wagonData)
 			-- Wagons are unattached or train is stopped
 			local proxyList = getWagonProxyTypes(wagonData.wagon)
 			if wagonData["proxy"] == nil or wagonData["proxy"][1]==nil  then
-				debugLog("why????")
+				debugLog("This should never happen.")
 				wagonData["proxy"] = createProxies(wagonData.wagon, wagonData["requestSlots"])
 			elseif wagonData["proxy"][1] ~= nul and not wagonData["proxy"][1].valid then
-				debugLog("Wagon has a proxy but it is invalid. WTF! time to destroy!") ------ NOOOOOOOOOOOOOOOOO BROKEN!
+				debugLog("Wagon has a proxy but it is invalid. Destroying proxy!")
 				wagonData["proxy"] = nil
 			elseif wagonData["proxy"][1].name ~= proxyList[1] then
-				debugLog("Wrong proxy: " .. wagonData["proxy"][1].name .. " != " .. proxyList[1])
+				debugLog("Wagon has wrong proxy: " .. wagonData["proxy"][1].name .. " != " .. proxyList[1])
 				wagonData = syncAllState(wagonData)
 				destroyProxies(wagonData["proxy"])
 				wagonData["proxy"] = createProxies(wagonData.wagon, wagonData["requestSlots"])
@@ -618,7 +617,7 @@ function copyInventory(copyFrom, copyTo, filter)
 			end
 			if filter == name or filter == filterType or filter == "*" then
 				local diff = getItemDifference(name,fromContents[name], toContents[name])
-				debugLog(diff)
+				--debugLog(diff)
 				if diff ~= 0 then
 					action[name] = diff
 				end
@@ -633,7 +632,7 @@ function copyInventory(copyFrom, copyTo, filter)
 			end
 		end
 		for name,diff in pairs(action) do
-			debugLog("#################itemName: " .. name .. " diff: " .. diff)
+			--debugLog("#################itemName: " .. name .. " diff: " .. diff)
 			if diff > 0 then
 				copyTo.insert({name=name,count=diff})
 			elseif diff < 0 then
@@ -680,7 +679,7 @@ function getApiVersion()
 end
 
 function debugLog(message)
-	if false then -- set for debug
+	if true then -- set for debug
 		game.player.print(message)
 	end
 end
