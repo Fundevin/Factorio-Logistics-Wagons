@@ -1,0 +1,9 @@
+{
+	"name": "LogisticsWagons",
+	"version": "0.1",
+	"title": "Logistics Wagons",
+	"author": "gnz",
+	"homepage": "https://github.com/gnzzz/Logistics-Wagons",
+	"dependencies": ["base > 0.11"],
+	"description": "Wagons for the logistics network "
+}
