@@ -1,3 +1,43 @@
+function logistics_stock_back_light()
+  return
+  {
+    {
+      minimum_darkness = 0.3,
+      color = {r=1},
+      shift = {-0.6, 3.0},
+      size = 2,
+      intensity = 0.6
+    },
+    {
+      minimum_darkness = 0.3,
+      color = {r=1},
+      shift = {0.6, 3.0},
+      size = 2,
+      intensity = 0.6
+    }
+  }
+end
+
+function logistics_stock_stand_by_light()
+  return
+  {
+    {
+      minimum_darkness = 0.3,
+      color = {b=1},
+      shift = {-0.6, -3.0},
+      size = 2,
+      intensity = 0.5
+    },
+    {
+      minimum_darkness = 0.3,
+      color = {b=1},
+      shift = {0.6, -3.0},
+      size = 2,
+      intensity = 0.5
+    }
+  }
+end
+
 data:extend(
 {
   {
@@ -50,15 +90,14 @@ data:extend(
         percent = 20
       }
     },
-    back_light = rolling_stock_back_light(),
-    stand_by_light = rolling_stock_stand_by_light(),
-    pictures =
+    back_light = logistics_stock_back_light(),
+    stand_by_light = logistics_stock_stand_by_light(),
+	pictures =
 	{
 		priority = "very-low",
 		width = 285,
 		height = 250,
 		axially_symmetrical = false,
-		--back_equals_front = true,
 		direction_count = 256,
 		filenames =
 		{
@@ -142,15 +181,14 @@ data:extend(
         percent = 20
       }
     },
-    back_light = rolling_stock_back_light(),
-    stand_by_light = rolling_stock_stand_by_light(),
+    back_light = logistics_stock_back_light(),
+    stand_by_light = logistics_stock_stand_by_light(),
     pictures =
 	{
 		priority = "very-low",
 		width = 285,
 		height = 250,
 		axially_symmetrical = false,
-		--back_equals_front = true,
 		direction_count = 256,
 		filenames =
 		{
@@ -233,15 +271,14 @@ data:extend(
         percent = 20
       }
     },
-    back_light = rolling_stock_back_light(),
-    stand_by_light = rolling_stock_stand_by_light(),
+    back_light = logistics_stock_back_light(),
+    stand_by_light = logistics_stock_stand_by_light(),
     pictures =
 	{
 		priority = "very-low",
 		width = 285,
 		height = 250,
 		axially_symmetrical = false,
-		--back_equals_front = true,
 		direction_count = 256,
 		filenames =
 		{
@@ -324,15 +361,14 @@ data:extend(
         percent = 20
       }
     },
-    back_light = rolling_stock_back_light(),
-    stand_by_light = rolling_stock_stand_by_light(),
+    back_light = logistics_stock_back_light(),
+    stand_by_light = logistics_stock_stand_by_light(),
     pictures =
 	{
 		priority = "very-low",
 		width = 285,
 		height = 250,
 		axially_symmetrical = false,
-		--back_equals_front = true,
 		direction_count = 256,
 		filenames =
 		{
@@ -450,7 +486,7 @@ data:extend(
     corpse = "small-remnants",
     collision_box = {{-0.35, -0.35}, {0.35, 0.35}},
 	collision_mask = {"ghost-layer"},
-    selection_box = {{-0.7, -2.5}, {1, 2.5}},
+    selection_box = {{-0.5, -0.5}, {0.5, 0.5}},
     fast_replaceable_group = "container",
     inventory_size = 20,
     logistic_mode = "requester",
