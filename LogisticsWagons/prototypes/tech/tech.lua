@@ -2,25 +2,25 @@ data:extend(
 {
   {
     type = "technology",
-    name = "logistic-wagons",
+    name = "lw-logistic-wagons",
     icon = "__LogisticsWagons__/resources/icons/wagon-passive-provider.png",
     effects =
     {
       {
         type = "unlock-recipe",
-        recipe = "cargo-wagon-passive"
+        recipe = "lw-cargo-wagon-passive"
       },
       {
         type = "unlock-recipe",
-        recipe = "cargo-wagon-active"
+        recipe = "lw-cargo-wagon-active"
       },
       {
         type = "unlock-recipe",
-        recipe = "cargo-wagon-storage"
+        recipe = "lw-cargo-wagon-storage"
       },
 	  {
         type = "unlock-recipe",
-        recipe = "cargo-wagon-requester"
+        recipe = "lw-cargo-wagon-requester"
       },
     },
     prerequisites = { "logistic-system"},

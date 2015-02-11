@@ -280,8 +280,8 @@ end
 
 function isKnownWagon(wagonName)
 	if wagonName ~= nil then
-		if wagonName == "cargo-wagon-passive" or wagonName == "cargo-wagon-active" 
-			or wagonName == "cargo-wagon-storage" or wagonName == "cargo-wagon-requester" then
+		if wagonName == "lw-cargo-wagon-passive" or wagonName == "lw-cargo-wagon-active" 
+			or wagonName == "lw-cargo-wagon-storage" or wagonName == "lw-cargo-wagon-requester" then
 			return true
 		end
 	end
@@ -291,13 +291,13 @@ end
 function getWagonProxyTypes(wagon)
 	if wagon ~= nil then
 		if wagon.valid then
-			if wagon.name == "cargo-wagon-passive" then return {"logistic-chest-passive-provider-trans"}
-			elseif wagon.name == "cargo-wagon-active" then return {"logistic-chest-active-provider-trans"}
-			elseif wagon.name == "cargo-wagon-storage" then return {"logistic-chest-storage-provider-trans"}
-			elseif wagon.name == "cargo-wagon-requester" then return {"logistic-chest-requester-trans"}
+			if wagon.name == "lw-cargo-wagon-passive" then return {"lw-logistic-chest-passive-provider-trans"}
+			elseif wagon.name == "lw-cargo-wagon-active" then return {"lw-logistic-chest-active-provider-trans"}
+			elseif wagon.name == "lw-cargo-wagon-storage" then return {"lw-logistic-chest-storage-provider-trans"}
+			elseif wagon.name == "lw-cargo-wagon-requester" then return {"lw-logistic-chest-requester-trans"}
 			end
 			
-			return "logistic-chest-passive-provider-trans" -- DEFAULT!
+			return "lw-logistic-chest-passive-provider-trans" -- DEFAULT!
 		end
 	end
 end
@@ -478,7 +478,7 @@ function processWagon(wagonData)
 end
 
 function isRequester(proxy)
-	if proxy ~= nil and proxy.valid and proxy.name == "logistic-chest-requester-trans" then
+	if proxy ~= nil and proxy.valid and proxy.name == "lw-logistic-chest-requester-trans" then
 		return true
 	end
 	return false
