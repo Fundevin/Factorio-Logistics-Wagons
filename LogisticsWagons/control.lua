@@ -11,21 +11,21 @@ game.onevent(defines.events.ontick, function(event)
 		apiWarning = false
 		glob.apiVersion = getApiVersion()
 		debugLog("API -- " .. glob.apiVersion)
-		if glob.wagons ~= nil then
-			glob.wagonsData = convertWagonsToWagonsData(glob.wagons)
-			glob.wagons = nil
+		if glob.logisticWagons ~= nil then
+			glob.logisticWagonsData = convertWagonsToWagonsData(glob.logisticWagons)
+			glob.logisticWagons = nil
 		end
 
-		glob.wagonsData = initWagonsData(glob.wagonsData)
+		glob.logisticWagonsData = initWagonsData(glob.logisticWagonsData)
 		debugLog("SETUP End!!!!!!!!!!!!")
 	end
 		
-	if glob.wagonsData~=nil and event.tick %20 == 3 then
-		glob.wagonsData = updateWagons(glob.wagonsData)
+	if glob.logisticWagonsData~=nil and event.tick %20 == 3 then
+		glob.logisticWagonsData = updateWagons(glob.logisticWagonsData)
 	end
 	
-	if glob.wagonsData ~= nile and event.tick ~= 1 then
-		glob.wagonsData = updateProxyPositions(glob.wagonsData)
+	if glob.logisticWagonsData ~= nile and event.tick ~= 1 then
+		glob.logisticWagonsData = updateProxyPositions(glob.logisticWagonsData)
 	end
 end)
 
@@ -75,27 +75,27 @@ end
 
 game.onevent(defines.events.onentitydied, function(event)
 	if isKnownWagon(event.entity.name) then
-		removeWagonFromTable(glob.wagonsData, event.entity)
+		removeWagonFromTable(glob.logisticWagonsData, event.entity)
 	end
 end)
 
 game.onevent(defines.events.onpreplayermineditem, function(event) -- THIS SHOULD BE THE SAME AS events.onentitydied - I should really create a new function...
 	if isKnownWagon(event.entity.name) then
-		removeWagonFromTable(glob.wagonsData, event.entity)
+		removeWagonFromTable(glob.logisticWagonsData, event.entity)
 	end
 end)
 
 game.onevent(defines.events.onbuiltentity, function(event)
 	if isKnownWagon(event.createdentity.name) then
-		createProxies(event.createdentity, {}) --glob.wagonsData["requestSlots"]
-		addWagonToTable(glob.wagonsData, event.createdentity)
+		createProxies(event.createdentity, {}) --glob.logisticWagonsData["requestSlots"]
+		addWagonToTable(glob.logisticWagonsData, event.createdentity)
 	end
 end)
 
 game.onsave(function()
-	for i, wagonData in pairs(glob.wagonsData) do
+	for i, wagonData in pairs(glob.logisticWagonsData) do
 		if hasValidWagon(wagonData) then
-			-- glob.wagonsData = updateWagons(glob.wagonsData)
+			-- glob.logisticWagonsData = updateWagons(glob.logisticWagonsData)
 			updateWagonPosition(wagonData)
 			updateWagonProxyPosition(wagonData)
 		end
@@ -231,10 +231,10 @@ function setRequestSlots(proxy, requestSlots)
 	end
 end
 
---Accesses glob.wagonsData
+--Accesses glob.logisticWagonsData
 function findWagonDataFromEntity(entity)
-	if entity ~= nil and entity.valid and glob.wagonsData ~= nil then
-		for i,wagonData in ipairs(glob.wagonsData) do
+	if entity ~= nil and entity.valid and glob.logisticWagonsData ~= nil then
+		for i,wagonData in ipairs(glob.logisticWagonsData) do
 			if wagonData ~= nil and wagonData.wagon ~= nil and wagonData.wagon.equals(entity) then
 				return wagonData
 			end
@@ -554,7 +554,7 @@ end
 function syncInventory(wagon, proxy, inventoryCount) -- inventoryCount should be -1 for first sync
 	if proxy == nil or not proxy.valid then
 		debugLog("Proxy does not exist. something is wrong, we should not be here")
-		--glob.wagons[wagon]["proxy"] = nil
+		--glob.logisticWagons[wagon]["proxy"] = nil
 		return
 	end
 	local wagonInventory = wagon.getinventory(1)
@@ -640,7 +640,6 @@ function copyInventory(copyFrom, copyTo, filter)
 			end
 		end
 	end
-	
 end
 
 function getItemDifference(item, syncFromItemCount, syncToItemCount)
