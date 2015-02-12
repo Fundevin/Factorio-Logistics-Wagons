@@ -120,6 +120,10 @@ function addWagonToTable(wagonsData, wagon) --, proxyPosition)
 			local inventory = wagon.getinventory(1)
 			newWagon["inventoryCount"] = inventory.getitemcount()
 		end
+		if hasInventory(newWagon.proxy) then
+			local proxyInventory = newWagon.proxy[1].getinventory(1)
+			newWagon["proxyinventoryCount"] = proxyInventory.getitemcount()
+		end
 		newWagon["requestSlots"] = {}
 		
 		table.insert(wagonsData, newWagon)
@@ -189,8 +193,15 @@ function updateInventoryCount(wagonData)
 	--debugLog("updateInventoryCount()")
 	if hasValidWagon(wagonData) and hasInventory(wagonData.wagon) then
 			local inventory = wagonData.wagon.getinventory(1)
-			wagonData["inventoryCount"] = inventory.getitemcount()
-			--debugLog("count: " .. inventory.getitemcount())
+			if wagonData["inventoryCount"] ~= inventory.getitemcount() then
+				wagonData["inventoryCount"] = inventory.getitemcount()
+				debugLog("Updating wagon inventory count to: " .. inventory.getitemcount())
+			end
+			local proxyInventory = wagonData.proxy[1].getinventory(1)
+			if wagonData["proxyInventoryCount"] ~= proxyInventory.getitemcount() then
+				wagonData["proxyInventoryCount"] = proxyInventory.getitemcount()
+				debugLog("Updating proxy inventory count to: " .. proxyInventory.getitemcount())
+			end
 	else
 		wagonData["inventoryCount"] = -1
 	end
@@ -429,7 +440,7 @@ function createProxies(wagon, requestSlots)
 					if wagonProxy ~= nil and wagonProxy.valid then
 						debugLog("****** ProxyValid")
 						if hasInventory(wagonProxy) then
-							syncInventory(wagon, wagonProxy, -1)
+							syncInventory(wagon, wagonProxy, -1, -1)
 						end
 						
 						if isRequester(wagonProxy) and requestSlots ~= nil then
@@ -488,8 +499,11 @@ function syncAllState(wagonData)
 	--debugLog("Sync State")
 	for i,proxy in ipairs(wagonData["proxy"]) do
 		if hasInventory(proxy) then
-			--debugLog("SyncInventory: " .. wagonData.wagon.name)
-			syncInventory(wagonData.wagon, proxy, wagonData.inventoryCount)
+--			debugLog("SyncInventory: " .. wagonData.wagon.name)
+			if syncInventory(wagonData.wagon, proxy, wagonData.inventoryCount, wagonData.proxyInventoryCount) then
+				-- Did an update, sync inventory cache
+				updateInventoryCount(wagonData)
+			end
 			wagonData = updateRequestSlots(wagonData)
 		end
 	end
@@ -551,7 +565,7 @@ function destroyProxy(proxy)
 	end
 end
 
-function syncInventory(wagon, proxy, inventoryCount) -- inventoryCount should be -1 for first sync
+function syncInventory(wagon, proxy, inventoryCount, proxyInventoryCount) -- inventoryCount should be -1 for first sync
 	if proxy == nil or not proxy.valid then
 		debugLog("Proxy does not exist. something is wrong, we should not be here")
 		--glob.logisticWagons[wagon]["proxy"] = nil
@@ -560,15 +574,23 @@ function syncInventory(wagon, proxy, inventoryCount) -- inventoryCount should be
 	local wagonInventory = wagon.getinventory(1)
 	local proxyInventory = proxy.getinventory(1)
 	
-	--debugLog("currentCount: " .. wagonInventory.getitemcount() .. " previous: " .. inventoryCount)
 	if wagonInventory.getitemcount() ~= inventoryCount then
-		--debugLog("copy to proxy")
+		debugLog("currentCount: " .. wagonInventory.getitemcount() .. " previous: " .. inventoryCount)
+		debugLog("copy to proxy")
 		local wagonInventory = wagon.getinventory(1)
 		local proxyInventory = proxy.getinventory(1)
 		copyInventory(wagonInventory, proxyInventory, "")
+		
+		return true
 	elseif not compareInventories(wagonInventory, proxyInventory) then
+--		debugLog("currentCount: " .. wagonInventory.getitemcount() .. " previous: " .. inventoryCount)
+--		debugLog("copy to wagon")
 		copyInventory(proxyInventory, wagonInventory, "*")
+		
+		return true
 	end
+	
+	return false
 end
 
 function compareInventories(inventoryA, inventoryB)
