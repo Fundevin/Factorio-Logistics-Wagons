@@ -9,7 +9,7 @@ SVERSIONTAG=${VERSIONTAG//v/_}
 RVERSIONTAG=`echo $VERSIONTAG | sed -e "s/v//"`
 
 echo "Updating version number"
-sed -e "s/\(\"version\": \"\).*\(\"\),/\1$RVERSIONTAG\2/" $FOLDER/info.json > $FOLDER/info.json_temp
+sed -e "s/\(\"version\": \"\).*\(\",\)/\1$RVERSIONTAG\2/" $FOLDER/info.json > $FOLDER/info.json_temp
 mv $FOLDER/info.json_temp $FOLDER/info.json
 
 echo "Creating zip file"
