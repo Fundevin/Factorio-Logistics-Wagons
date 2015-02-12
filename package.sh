@@ -1,0 +1,10 @@
+#!/bin/bash
+FOLDER="LogisticsWagons"
+
+VERSIONTAG=`git describe --abbrev=0 --tags`
+SVERSIONTAG=${VERSIONTAG//./_}
+SVERSIONTAG=${VERSIONTAG//v/_}
+
+cp -rf $FOLDER $FOLDER$SVERSIONTAG
+zip -r $FOLDER$SVERSIONTAG.zip $FOLDER$SVERSIONTAG -x "*/\.*"
+rm -rf $FOLDER$SVERSIONTAG
