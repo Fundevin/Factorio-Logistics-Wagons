@@ -1,7 +1,7 @@
 -- active logistics wagon
 local class = require 'middleclass'
 
-PassiveWagon = class('ActiveWagon',ProxyWagon)
+ActiveWagon = class('ActiveWagon',ProxyWagon)
 
 function ActiveWagon:initialize(parent,data)
 	ProxyWagon.initialize(self, parent, data)

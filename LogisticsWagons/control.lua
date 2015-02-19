@@ -17,6 +17,8 @@ require "util"
 require "wagons.wagon"
 require "wagons.proxywagon"
 require "wagons.passivewagon"
+require "wagons.activewagon"
+require "wagons.storagewagon"
 
 -- Initialisation
 game.oninit(function() oninit() end)
