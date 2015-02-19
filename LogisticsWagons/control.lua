@@ -1,7 +1,7 @@
 -- Debug functions needs to be in global scope to be able to be called from the classes
 
 function debugLog(message)
-	if false then -- set for debug
+	if true then -- set for debug
 		game.player.print(math.floor(game.tick / 60) .. " : " .. message)
 	end
 end
@@ -61,10 +61,14 @@ end
 function onbuiltentity(event)
 	debugLog("Build event: " .. serpent.dump(event))
 	local entity = event.createdentity
-	if entity.name == "rail-sensor" then
-		table.insert(glob.logisticWagons, Wagon(entity))
-	elseif entity.name == "electrical-actuator" then
+	if entity.name == "lw-cargo-wagon-passive" then
 		table.insert(glob.logisticWagons, PassiveWagon(entity))
+	elseif entity.name == "lw-cargo-wagon-active" then
+		table.insert(glob.logisticWagons, ActiveWagon(entity))
+	elseif entity.name == "lw-cargo-wagon-requester" then
+		table.insert(glob.logisticWagons, RequesterWagon(entity))
+	elseif entity.name == "lw-cargo-wagon-storage" then
+		table.insert(glob.logisticWagons, StorageWagon(entity))
 	end
 end
 
@@ -74,10 +78,12 @@ function onentityremoved(event)
 	if isKnownEntity(entity.name) then
 		debugLog("A wagon was removed!")
 		local wagonPos = findWagonPosition(entity)
-		debugLog("Wagon pos: "..wagonPos)
-		local wagon = table.remove(glob.logisticWagons, wagonPos)
-		debugLog("Wagon: " .. serpent.dump(wagon))
-		wagon:remove()
+		if wagonPos ~= nil then
+			debugLog("Wagon pos: "..wagonPos)
+			local wagon = table.remove(glob.logisticWagons, wagonPos)
+			debugLog("Wagon: " .. serpent.dump(wagon))
+			wagon:remove()
+		end
 	end
 end
 
@@ -93,6 +99,8 @@ function findWagonPosition(entity)
 			return i
 		end
 	end
+	
+	return nil;
 end
 
 
