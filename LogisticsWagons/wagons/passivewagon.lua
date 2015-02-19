@@ -1,27 +1,24 @@
 -- passive logistics wagon
 local class = require 'middleclass'
 
-PassiveWagon = class('PassiveWagon',Wagon)
+PassiveWagon = class('PassiveWagon',ProxyWagon)
 
 function PassiveWagon:initialize(parent,data)
-	debugLog("Creating new passive logistics wagon")
-	Wagon.initialize(self, parent, data)
+	ProxyWagon.initialize(self, parent, data)
 	self.wagonType = "PassiveWagon"
 
 	if(data == nil) then
-		if parent ~= nil then	
+		if parent ~= nil then
 			self.valid = true
 			self.parent = parent
 			self.proxy = nil
-			self.inventoryCount = 0
+			self.inventoryCount = -1
 		end	
 	else
-		--debugLog("Recreating class")
-		
 		self.valid = data.valid
 		self.parent = data.parent
 		self.proxy = data.proxy
-		self.inventoryCount = data.inventoryCount
+		self.inventoryCount = data.inventoryCount or -1
 	end
 	
 	self:updateDataSerialisation()
@@ -29,9 +26,10 @@ end
 
 function PassiveWagon:updateDataSerialisation()
 --	debugLog("Updating PassiveWagon serialisation")
-	Wagon.updateDataSerialisation(self)
+	ProxyWagon.updateDataSerialisation(self)
 	
 	self.data.proxy = self.proxy
+	self.data.inventoryCount = self.inventoryCount
 end
 
 

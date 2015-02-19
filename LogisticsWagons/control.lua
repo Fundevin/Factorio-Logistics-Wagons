@@ -15,7 +15,8 @@ require "defines"
 require "util"
 
 require "wagons.wagon"
-require "wagons.passiveWagon"
+require "wagons.proxywagon"
+require "wagons.passivewagon"
 
 -- Initialisation
 game.oninit(function() oninit() end)
@@ -82,7 +83,9 @@ function onentityremoved(event)
 		if wagonPos ~= nil then
 			debugLog("Wagon pos: "..wagonPos)
 			local wagon = table.remove(glob.logisticWagons, wagonPos)
-			wagon:removeProxy()
+			if(wagon.proxy) then
+				wagon:removeProxy()
+			end
 		end
 	end
 end
