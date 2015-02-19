@@ -20,8 +20,6 @@ function Wagon:initialize(parent,data)
 	if( parent ~= nil) then
 		self:registerWagonParent(parent.name)
 	end
-	
-	return class
 end
 
 function Wagon:updateDataSerialisation()

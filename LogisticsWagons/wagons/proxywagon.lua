@@ -9,25 +9,25 @@ function ProxyWagon:initialize(parent,data)
 	self.wagonType = "ProxyWagon"
 	
 	if(data == nil) then
-		self.iswagon = true
-		self.valid = false
-		self.parent = parent
+		if parent ~= nil then
+			self.valid = true
+			self.parent = parent
+			self.proxy = nil
+			self.inventoryCount = -1
+		end	
 	else
-		self.iswagon = data.iswagon
 		self.valid = data.valid
 		self.parent = data.parent
+		self.proxy = data.proxy
+		self.inventoryCount = data.inventoryCount or -1
 	end
-	
-	if( parent ~= nil) then
-		self:registerWagonParent(parent.name)
-	end
-	
-	return class
 end
 
 function ProxyWagon:updateDataSerialisation()
 	Wagon.updateDataSerialisation(self)
 	
+	self.data.proxy = self.proxy
+	self.data.inventoryCount = self.inventoryCount
 end
 
 function ProxyWagon:updateWagon()
