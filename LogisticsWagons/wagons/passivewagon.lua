@@ -1,36 +1,44 @@
 -- passive logistics wagon
+local class = require 'middleclass'
 
-PassiveWagon = class(Wagon, function (class,parent,data)
+PassiveWagon = class('PassiveWagon',Wagon)
+
+function PassiveWagon:initialize(parent,data)
 	debugLog("Creating new passive logistics wagon")
-	class = Wagon.init(class,parent,data)
-	class.wagonType = "PassiveWagon"
+	--class = Wagon.init(class,parent,data)
+	Wagon.initialize(self, parent, data)
+	self.wagonType = "PassiveWagon"
 
 	if(data == nil) then
 		if parent ~= nil then	
-			class.valid = true
-			class.parent = parent
-			class.position = parent.position
-			class.proxy = class:createProxy(parent)
+			self.valid = true
+			self.parent = parent
+			debugLog("Parent: " .. serpent.dump(parent))
+			self.position = parent.position
+			self.proxy = nil
 		end	
 	else
 		--debugLog("Recreating class")
 		
-		class.valid = data.valid
-		class.parent = data.parent
-		class.position = data.position
-		class.proxy = data.proxy
+		self.valid = data.valid
+		self.parent = data.parent
+		self.position = data.position
+		self.proxy = data.proxy
 	end
-	
-	return class
-end)
-
-function PassiveWagon:updateWagon()
-
 end
 
-function PassiveWagon:createProxy(parent)
+--function PassiveWagon:updateWagon()
+--	if(self.parent.train.speed > 0) then
+--		self:moveProxy(self.parent)
+--	end
+--end
+
+
+
+function PassiveWagon:createProxyType()
 	local proxyType = "lw-logistic-chest-passive-provider-trans"
-	return Wagon:createProxy(parent, proxyType)
+	local proxyType = "logistic-chest-passive-provider"
+	return self:createProxy(proxyType, true)
 end
 
 function PassiveWagon:copyInventory(copyFrom, copyTo, entityName)

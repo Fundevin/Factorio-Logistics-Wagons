@@ -12,8 +12,8 @@ module(..., package.seeall)
 require "defines"
 require "util"
 
-require "class"
 require "wagons.wagon"
+require "wagons.passiveWagon"
 
 -- Initialisation
 game.oninit(function() oninit() end)
@@ -40,20 +40,19 @@ function onload()
 	debugLog("load")
 	glob.logisticWagons = glob.logisticWagons or {}
 	
-	for i,wagon in pairs(glob.logisticWagons) do	
-		debugLog("Loaded wagon: " .. i .. " - " .. serpent.dump(wagon))
-		if wagon.wagonType == "Wagon" then
---			glob.sensors[i] = Wagon(asensor.parent,asensor)
-		elseif wagon.wagonType == "PassiveWagon" then
---			glob.sensors[i] = PassiveWagon(asensor.parent,asensor)
-		end
-	end
+--	for i,wagon in pairs(glob.logisticWagons) do	
+--		debugLog("Loaded wagon: " .. i .. " - " .. serpent.dump(wagon))
+--		if wagon.wagonType == "Wagon" then
+--			glob.sensors[i] = Wagon(wagon.parent,wagon)
+--		elseif wagon.wagonType == "PassiveWagon" then
+--			glob.sensors[i] = PassiveWagon(wagon.parent,wagon)
+--		end
+--	end
 end
 
 function ontick(event)
 --	debugLog("tick")
 	for i,wagon in pairs(glob.logisticWagons) do	
---		debugLog("Checking sensor: " .. i .. " - " .. serpent.dump(asensor))
 		wagon:updateWagon()
 	end
 end
@@ -62,13 +61,14 @@ function onbuiltentity(event)
 	debugLog("Build event: " .. serpent.dump(event))
 	local entity = event.createdentity
 	if entity.name == "lw-cargo-wagon-passive" then
-		table.insert(glob.logisticWagons, PassiveWagon(entity))
+		local test = PassiveWagon:new(entity)
+		table.insert(glob.logisticWagons, test)
 	elseif entity.name == "lw-cargo-wagon-active" then
-		table.insert(glob.logisticWagons, ActiveWagon(entity))
+		table.insert(glob.logisticWagons, ActiveWagon:new(entity))
 	elseif entity.name == "lw-cargo-wagon-requester" then
-		table.insert(glob.logisticWagons, RequesterWagon(entity))
+		table.insert(glob.logisticWagons, RequesterWagon:new(entity))
 	elseif entity.name == "lw-cargo-wagon-storage" then
-		table.insert(glob.logisticWagons, StorageWagon(entity))
+		table.insert(glob.logisticWagons, StorageWagon:new(entity))
 	end
 end
 
@@ -81,8 +81,7 @@ function onentityremoved(event)
 		if wagonPos ~= nil then
 			debugLog("Wagon pos: "..wagonPos)
 			local wagon = table.remove(glob.logisticWagons, wagonPos)
-			debugLog("Wagon: " .. serpent.dump(wagon))
-			wagon:remove()
+			wagon:removeProxy()
 		end
 	end
 end

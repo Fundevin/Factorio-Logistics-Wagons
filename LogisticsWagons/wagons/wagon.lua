@@ -1,14 +1,19 @@
 -- Wagon class definitions and functions
+local class = require 'middleclass'
 
-Wagon = class(function(class,parent,data)
+Wagon = class('Wagon')
+
+function Wagon:initialize(parent,data)
 	--debugLog("Parent wagon here")
 	
 	if(data == nil) then
 		class.iswagon = true
 		class.valid = false
+		class.parent = parent
 	else
 		class.iswagon = data.iswagon
 		class.valid = data.valid
+		class.parent = data.parent
 	end
 	
 	if( parent ~= nil) then
@@ -16,13 +21,58 @@ Wagon = class(function(class,parent,data)
 	end
 	
 	return class
-end)
-
-function Wagon:updateWagon()
-	--debugLog("This shouldn't be called!")
 end
 
-function Wagon:createProxy(parent, proxyType, makeOperable)
+function Wagon:updateWagon()
+	if(self.proxy ~= nil) then
+		if(self:isMoving() and not self:allowsProxyWhileMoving()) then
+			debugLog("Moving, should remove proxy")
+			self:removeProxy()
+			self.proxy = nil
+		end
+	else
+		if(not self:isMoving() or (self:isMoving() and self:allowsProxyWhileMoving())) then
+			debugLog("No proxy created, making one!")
+			self.proxy = self:createProxyType()
+		end
+	end
+end
+
+function Wagon:isMoving()
+	return self:getSpeed() > 0
+end
+
+function Wagon:getSpeed()
+	if (self.parent and self.parent.train) then
+		return self.parent.train.speed
+	else
+		return 0
+	end
+end
+
+function Wagon:allowsProxyWhileMoving()
+	return false
+end
+
+function Wagon:getProxyPosition()
+	debugLog("Trying to get position of : " .. serpent.dump(self.parent))
+	
+	local parentEntity = self.parent
+	if(parentEntity ~= nil) then
+		local proxyPosition = parentEntity.position
+		proxyPosition.x = proxyPosition.x + 2
+	
+		return proxyPosition
+	end
+	
+	return nil
+end
+
+function Wagon:moveProxy(parent)
+	self.proxy.position = self:getProxyPosition()
+end
+
+function Wagon:createProxy(proxyType, makeOperable)
 	debugLog("Creating new wagon proxy of type " .. proxyType)
 	
 	if makeOperable == nil then
@@ -30,8 +80,9 @@ function Wagon:createProxy(parent, proxyType, makeOperable)
 	end
 	
 	local proxy = {}
-	if parent ~= nil and parent.valid then
-		local proxyPosition = parent.position
+	local parentEntity = self.parent
+	if parentEntity ~= nil and parentEntity.valid then
+		local proxyPosition = self:getProxyPosition()
 --		debugLog("**PROXY x: " .. proxyPosition.x .. " y: " .. proxyPosition.y)
 --		debugLog("**PARENT x: " .. parent.position.x .. " y: " .. parent.position.y)
 		debugLog("Creating " .. proxyType .. " at " .. proxyPosition.x .. " " .. proxyPosition.y)
@@ -44,15 +95,15 @@ function Wagon:createProxy(parent, proxyType, makeOperable)
 		proxy.operable = makeOperable;
 		return proxy
 	else
-		--debugLog("not valid?")
-		--debugLog(parent.valid)
+		debugLog("not valid?")
+--		debugLog(serpent.dump(self))
 	end
-	return proxy
+	return nil
 end
 
-function Wagon:emptyProxy(wagon)
-	if (wagon.proxy.valid) then
-		local container = wagon.proxy.getinventory(1)
+function Wagon:emptyProxy()
+	if (self.proxy.valid) then
+		local container = self.proxy.getinventory(1)
 		local contents = container.getcontents()
 		for name,count in pairs(contents) do
 			container.remove({name=name,count=count})
@@ -75,8 +126,12 @@ function Wagon:registerWagonParent(name)
 	end
 end
 
-function Wagon:remove()
-	debugLog("Trying to remove wagon")
-	Wagon:emptyProxy(self)
+function Wagon:removeProxy()
+	debugLog("Trying to remove proxy: " .. serpent.dump(self.proxy))
+	self:emptyProxy(self)
 	self.proxy.destroy()
+end
+
+function Wagon:syncProxyToInventory()
+
 end
