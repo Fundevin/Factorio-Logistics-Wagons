@@ -5,34 +5,65 @@ Wagon = class('Wagon')
 
 function Wagon:initialize(parent,data)
 	--debugLog("Parent wagon here")
+	self.wagonType = "Wagon"
 	
 	if(data == nil) then
-		class.iswagon = true
-		class.valid = false
-		class.parent = parent
+		self.iswagon = true
+		self.valid = false
+		self.parent = parent
 	else
-		class.iswagon = data.iswagon
-		class.valid = data.valid
-		class.parent = data.parent
+		self.iswagon = data.iswagon
+		self.valid = data.valid
+		self.parent = data.parent
 	end
 	
 	if( parent ~= nil) then
-		Wagon:registerWagonParent(parent.name)
+		self:registerWagonParent(parent.name)
 	end
 	
 	return class
 end
 
+function Wagon:updateDataSerialisation()
+--	debugLog("Updating Wagon serialisation")
+	
+	if(self.data == nil) then
+		self.data = {}
+	end
+	
+	self.data.iswagon = self.iswagon
+	self.data.valid = self.valid
+	self.data.parent = self.parent
+	self.data.wagonType = self.wagonType
+end
+
+function Wagon:__len()
+	-- If this is being asked for, make sure serialisation is up to date
+	self:updateDataSerialisation()
+	return #self.data
+end
+
+function Wagon:__pairs()
+	return coroutine.wrap(function() 
+          for k,v in pairs(self.data) do
+            coroutine.yield(k,v)
+          end
+        end)
+end
+
 function Wagon:updateWagon()
 	if(self.proxy ~= nil) then
 		if(self:isMoving() and not self:allowsProxyWhileMoving()) then
-			debugLog("Moving, should remove proxy")
+			-- Moving and not allowing proxy while moving, should remove the proxy
 			self:removeProxy()
 			self.proxy = nil
+		else
+			-- Standing still, should update the proxy count
+			self:updateProxyInventory()
 		end
 	else
 		if(not self:isMoving() or (self:isMoving() and self:allowsProxyWhileMoving())) then
-			debugLog("No proxy created, making one!")
+			-- No proxy, but there should be one
 			self.proxy = self:createProxyType()
 		end
 	end
@@ -73,7 +104,7 @@ function Wagon:moveProxy(parent)
 end
 
 function Wagon:createProxy(proxyType, makeOperable)
-	debugLog("Creating new wagon proxy of type " .. proxyType)
+--	debugLog("Creating new proxy of type " .. proxyType)
 	
 	if makeOperable == nil then
 		makeOperable = false
@@ -83,8 +114,6 @@ function Wagon:createProxy(proxyType, makeOperable)
 	local parentEntity = self.parent
 	if parentEntity ~= nil and parentEntity.valid then
 		local proxyPosition = self:getProxyPosition()
---		debugLog("**PROXY x: " .. proxyPosition.x .. " y: " .. proxyPosition.y)
---		debugLog("**PARENT x: " .. parent.position.x .. " y: " .. parent.position.y)
 		debugLog("Creating " .. proxyType .. " at " .. proxyPosition.x .. " " .. proxyPosition.y)
 		
 		game.createentity{name=proxyType, position=proxyPosition, force=game.player.force}

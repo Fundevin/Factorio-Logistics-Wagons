@@ -2,7 +2,9 @@
 
 function debugLog(message)
 	if true then -- set for debug
-		game.player.print(math.floor(game.tick / 60) .. " : " .. message)
+		local string = math.floor(game.tick / 60) .. " : " .. message
+		game.player.print(string)
+		print(string)
 	end
 end
 
@@ -32,37 +34,36 @@ game.onevent(defines.events.onrobotpremined, function(event) onentityremoved(eve
 game.onevent(defines.events.ontick, function(event) ontick(event) end)
 
 function oninit()
-	debugLog("init")
+--	debugLog("init")
 	glob.logisticWagons = glob.logisticWagons or {}
 end
 
 function onload()
-	debugLog("load")
+--	debugLog("load")
 	glob.logisticWagons = glob.logisticWagons or {}
 	
---	for i,wagon in pairs(glob.logisticWagons) do	
+	for i,wagon in pairs(glob.logisticWagons) do	
 --		debugLog("Loaded wagon: " .. i .. " - " .. serpent.dump(wagon))
---		if wagon.wagonType == "Wagon" then
---			glob.sensors[i] = Wagon(wagon.parent,wagon)
---		elseif wagon.wagonType == "PassiveWagon" then
---			glob.sensors[i] = PassiveWagon(wagon.parent,wagon)
---		end
---	end
+		if wagon.wagonType == "Wagon" then
+--			glob.logisticWagons[i] = Wagon:new(wagon.parent,wagon)
+		elseif wagon.wagonType == "PassiveWagon" then
+			glob.logisticWagons[i] = PassiveWagon:new(wagon.parent,wagon)
+		end
+	end
 end
 
 function ontick(event)
 --	debugLog("tick")
-	for i,wagon in pairs(glob.logisticWagons) do	
+	for i,wagon in pairs(glob.logisticWagons) do
 		wagon:updateWagon()
 	end
 end
 
 function onbuiltentity(event)
-	debugLog("Build event: " .. serpent.dump(event))
+--	debugLog("Build event: " .. serpent.dump(event))
 	local entity = event.createdentity
 	if entity.name == "lw-cargo-wagon-passive" then
-		local test = PassiveWagon:new(entity)
-		table.insert(glob.logisticWagons, test)
+		table.insert(glob.logisticWagons, PassiveWagon:new(entity))
 	elseif entity.name == "lw-cargo-wagon-active" then
 		table.insert(glob.logisticWagons, ActiveWagon:new(entity))
 	elseif entity.name == "lw-cargo-wagon-requester" then

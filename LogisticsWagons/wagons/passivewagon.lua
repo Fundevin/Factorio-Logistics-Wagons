@@ -5,7 +5,6 @@ PassiveWagon = class('PassiveWagon',Wagon)
 
 function PassiveWagon:initialize(parent,data)
 	debugLog("Creating new passive logistics wagon")
-	--class = Wagon.init(class,parent,data)
 	Wagon.initialize(self, parent, data)
 	self.wagonType = "PassiveWagon"
 
@@ -13,8 +12,6 @@ function PassiveWagon:initialize(parent,data)
 		if parent ~= nil then	
 			self.valid = true
 			self.parent = parent
-			debugLog("Parent: " .. serpent.dump(parent))
-			self.position = parent.position
 			self.proxy = nil
 		end	
 	else
@@ -22,17 +19,18 @@ function PassiveWagon:initialize(parent,data)
 		
 		self.valid = data.valid
 		self.parent = data.parent
-		self.position = data.position
 		self.proxy = data.proxy
 	end
+	
+	self:updateDataSerialisation()
 end
 
---function PassiveWagon:updateWagon()
---	if(self.parent.train.speed > 0) then
---		self:moveProxy(self.parent)
---	end
---end
-
+function PassiveWagon:updateDataSerialisation()
+--	debugLog("Updating PassiveWagon serialisation")
+	Wagon.updateDataSerialisation(self)
+	
+	self.data.proxy = self.proxy
+end
 
 
 function PassiveWagon:createProxyType()
