@@ -59,7 +59,7 @@ function Wagon:updateWagon()
 			self.proxy = nil
 		else
 			-- Standing still, should update the proxy count
-			self:updateProxyInventory()
+			self:syncProxyAndInventory()
 		end
 	else
 		if(not self:isMoving() or (self:isMoving() and self:allowsProxyWhileMoving())) then
@@ -91,7 +91,7 @@ function Wagon:getProxyPosition()
 	local parentEntity = self.parent
 	if(parentEntity ~= nil) then
 		local proxyPosition = parentEntity.position
-		proxyPosition.x = proxyPosition.x + 2
+		proxyPosition.x = proxyPosition.x
 	
 		return proxyPosition
 	end
@@ -113,6 +113,8 @@ function Wagon:createProxy(proxyType, makeOperable)
 	local proxy = {}
 	local parentEntity = self.parent
 	if parentEntity ~= nil and parentEntity.valid then
+		self.inventoryCount = -1
+		
 		local proxyPosition = self:getProxyPosition()
 		debugLog("Creating " .. proxyType .. " at " .. proxyPosition.x .. " " .. proxyPosition.y)
 		
@@ -140,12 +142,6 @@ function Wagon:emptyProxy()
 	end
 end
 
-function Wagon:addToProxy(entityName,amount)
-	if self.proxy ~= nil and amount > 0 then
-		self.proxy.getinventory(1).insert({name=entityName,count=amount})
-	end
-end
-
 function Wagon:registerWagonParent(name)
 	glob.logisticWagonsEntityNames = glob.logisticWagonsEntityNames or {}
 	
@@ -157,10 +153,96 @@ end
 
 function Wagon:removeProxy()
 	debugLog("Trying to remove proxy: " .. serpent.dump(self.proxy))
-	self:emptyProxy(self)
+	self:emptyProxy()
 	self.proxy.destroy()
+	self.inventoryCount = -1
 end
 
-function Wagon:syncProxyToInventory()
+function Wagon:syncProxyAndInventory()
+	if self.proxy == nil or not self.proxy.valid then
+		debugLog("Proxy does not exist. something is wrong, we should not be here")
+		--glob.logisticWagons[wagon]["proxy"] = nil
+		return
+	end
+	local wagonInventory = self.parent.getinventory(1)
+	local proxyInventory = self.proxy.getinventory(1)
+	
+	-- Should be saved, testing copying for now
+		
+	if wagonInventory.getitemcount() ~= self.inventoryCount then
+		debugLog("currentCount: " .. wagonInventory.getitemcount() .. " previous: " .. self.inventoryCount)
+		debugLog("copy to proxy")
+		self:copyInventory(wagonInventory, proxyInventory)
+		
+		self.inventoryCount = wagonInventory.getitemcount()
 
+		return true
+	elseif not self:compareInventories(wagonInventory, proxyInventory) then
+		debugLog("currentCount: " .. wagonInventory.getitemcount() .. " previous: " .. self.inventoryCount)
+		debugLog("copy to wagon")
+		self:copyInventory(proxyInventory, wagonInventory)
+		
+		self.inventoryCount = wagonInventory.getitemcount()
+
+		return true
+	end	
+	return false
+end
+
+function Wagon:compareInventories(inventoryA, inventoryB)
+	if inventoryA.getitemcount() ~= inventoryB.getitemcount() then
+		return false
+	else
+		local contentsA = inventoryA.getcontents()
+		local contentsB = inventoryB.getcontents()
+		for name, count in pairs(contentsA) do
+			if contentsB[name] == nil or contentsB[name] ~= count then
+				return false
+			end
+		end
+	end
+	return true
+end
+
+function Wagon:copyInventory(copyFrom, copyTo)
+	if copyFrom ~= nil and copyTo ~= nil then
+		local action = {}
+		local fromContents = copyFrom.getcontents()
+		local toContents = copyTo.getcontents()
+		for name,count in pairs(fromContents) do
+				local diff = self:getItemDifference(name,fromContents[name], toContents[name])
+				if diff ~= 0 then
+					action[name] = diff
+				end	
+		end
+				
+		for name,count in pairs(toContents) do
+				if fromContents[name] == nul then
+					action[name] = self:getItemDifference(name,fromContents[name],toContents[name])
+				end
+		end
+
+		for name,diff in pairs(action) do
+			--debugLog("#################itemName: " .. name .. " diff: " .. diff)
+			if diff > 0 then
+				copyTo.insert({name=name,count=diff})
+			elseif diff < 0 then
+				copyTo.remove({name=name,count=0-diff})
+			end
+		end
+	end
+end
+
+function Wagon:getItemDifference(item, syncFromItemCount, syncToItemCount)
+	if syncFromItemCount == nil then
+		if syncToItemCount ~= nil then
+			return 0 - syncToItemCount
+		end
+	elseif syncToItemCount == nil then 
+		return syncFromItemCount
+	else
+		return syncFromItemCount - syncToItemCount
+	end
+	
+	return 0
 end

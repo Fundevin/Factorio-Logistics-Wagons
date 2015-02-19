@@ -13,6 +13,7 @@ function PassiveWagon:initialize(parent,data)
 			self.valid = true
 			self.parent = parent
 			self.proxy = nil
+			self.inventoryCount = 0
 		end	
 	else
 		--debugLog("Recreating class")
@@ -20,6 +21,7 @@ function PassiveWagon:initialize(parent,data)
 		self.valid = data.valid
 		self.parent = data.parent
 		self.proxy = data.proxy
+		self.inventoryCount = data.inventoryCount
 	end
 	
 	self:updateDataSerialisation()
@@ -35,51 +37,7 @@ end
 
 function PassiveWagon:createProxyType()
 	local proxyType = "lw-logistic-chest-passive-provider-trans"
-	local proxyType = "logistic-chest-passive-provider"
 	return self:createProxy(proxyType, true)
-end
-
-function PassiveWagon:copyInventory(copyFrom, copyTo, entityName)
-	if copyFrom ~= nil and copyTo ~= nil then
-		local action = {}
-		local fromContents = copyFrom.getcontents()
-		local toContents = copyTo.getcontents()
-		for name,count in pairs(fromContents) do
-				local diff = self:getItemDifference(name,fromContents[name], toContents[name])
-				if diff ~= 0 then
-					action[name] = diff
-				end	
-		end
-				
-		for name,count in pairs(toContents) do
-				if fromContents[name] == nul then
-					action[name] = self:getItemDifference(name,fromContents[name],toContents[name])
-				end
-		end
-
-		for name,diff in pairs(action) do
-			--debugLog("#################itemName: " .. name .. " diff: " .. diff)
-			if diff > 0 then
-				copyTo.insert({name=name,count=diff})
-			elseif diff < 0 then
-				copyTo.remove({name=name,count=0-diff})
-			end
-		end
-	end
-end
-
-function PassiveWagon:getItemDifference(item, syncFromItemCount, syncToItemCount)
-	if syncFromItemCount == nil then
-		if syncToItemCount ~= nil then
-			return 0 - syncToItemCount
-		end
-	elseif syncToItemCount == nil then 
-		return syncFromItemCount
-	else
-		return syncFromItemCount - syncToItemCount
-	end
-	
-	return 0
 end
 
 -- This returns the number of inventory stacks the entity can have. 
