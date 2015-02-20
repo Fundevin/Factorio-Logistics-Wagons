@@ -486,7 +486,7 @@ data:extend(
     corpse = "small-remnants",
     collision_box = {{-0.35, -0.35}, {0.35, 0.35}},
 	collision_mask = {"ghost-layer"},
-    selection_box = {{-0.5, -0.5}, {0.5, 0.5}},
+    selection_box = {{-1, -1}, {1, 1}},
     fast_replaceable_group = "container",
     inventory_size = 20,
     logistic_mode = "requester",
