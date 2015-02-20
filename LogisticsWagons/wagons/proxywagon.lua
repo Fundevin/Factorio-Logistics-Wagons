@@ -34,6 +34,7 @@ function ProxyWagon:updateDataSerialisation()
 end
 
 function ProxyWagon:updateWagon(tick)
+	debugLog("ProxyWagon:updateWagon")
 	if(self.proxy ~= nil) then
 		if(self:isMoving() and not self:allowsProxyWhileMoving()) then
 			-- Moving and not allowing proxy while moving, should remove the proxy
@@ -49,7 +50,7 @@ function ProxyWagon:updateWagon(tick)
 	else
 		if(not self:isMoving() or (self:isMoving() and self:allowsProxyWhileMoving())) then
 			-- No proxy, but there should be one
-			self.proxy = self:createProxyType()
+			self:createProxyType()
 		end
 	end
 end
@@ -98,12 +99,10 @@ function ProxyWagon:createProxy(proxyType, makeOperable)
 			proxy = e
 		end
 		proxy.operable = makeOperable;
-		return proxy
+		self.proxy = proxy
 	else
-		debugLog("not valid?")
---		debugLog(serpent.dump(self))
+		self.proxy = nil
 	end
-	return nil
 end
 
 function ProxyWagon:emptyProxy()
