@@ -50,6 +50,30 @@ function onload()
 		debugLog("Loaded wagon: " .. i .. " - " .. serpent.dump(wagon))
 		glob.logisticWagons[i] = _G[wagon.wagonType]:new(wagon.parent,wagon)
 	end
+
+--	This is migration data, I could not get the migration scripts to acces the glob for some reason. Bug? Either way, I use class definitions and a nil check is probably as cheap as the factorio internal check
+	if(glob.logisticWagonsData ~= nil) then
+		for i,wagon in pairs(glob.logisticWagonsData) do
+			if (wagon.proxy[1].valid) then
+				local container = wagon.proxy[1].getinventory(1)
+				local contents = container.getcontents()
+				for name,count in pairs(contents) do
+					container.remove({name=name,count=count})
+				end
+			end
+			wagon.proxy[1].destroy()
+			
+			onbuiltentity({["name"] = wagon.wagon.name, ["createdentity"] = wagon.wagon})
+			
+			if(wagon.wagon.name == "lw-cargo-wagon-requester") then
+				local newwagon = glob.logisticWagons[#glob.logisticWagons]
+				newwagon.requestSlots = wagon.requestSlots
+				newwagon:setRequestSlots()
+			end
+		end
+		
+		glob.logisticWagonsData = nil
+	end
 end
 
 function ontick(event)
@@ -60,7 +84,7 @@ function ontick(event)
 end
 
 function onbuiltentity(event)
---	debugLog("Build event: " .. serpent.dump(event))
+	debugLog("Build event: " .. serpent.dump(event))
 	local entity = event.createdentity
 	if entity.name == "lw-cargo-wagon-passive" then
 		table.insert(glob.logisticWagons, PassiveWagon:new(entity))
