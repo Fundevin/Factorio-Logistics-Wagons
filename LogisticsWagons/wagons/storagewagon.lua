@@ -10,5 +10,5 @@ end
 
 function StorageWagon:createProxyType()
 	local proxyType = "lw-logistic-chest-storage-provider-trans"
-	return self:createProxy(proxyType, true)
+	return self:createProxy(proxyType)
 end

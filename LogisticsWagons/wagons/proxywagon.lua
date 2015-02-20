@@ -4,7 +4,7 @@ local class = require 'middleclass'
 ProxyWagon = class('ProxyWagon',Wagon)
 
 function ProxyWagon:initialize(parent,data)
-	--debugLog("Parent wagon here")
+	debugLog("Proxy wagon init")
 	Wagon.initialize(self, parent, data)
 	self.wagonType = "ProxyWagon"
 	
@@ -14,12 +14,14 @@ function ProxyWagon:initialize(parent,data)
 			self.parent = parent
 			self.proxy = nil
 			self.inventoryCount = -1
+			self.proxyCount = -1
 		end	
 	else
 		self.valid = data.valid
 		self.parent = data.parent
 		self.proxy = data.proxy
 		self.inventoryCount = data.inventoryCount or -1
+		self.proxyCount = data.proxyCount or -1
 	end
 end
 
@@ -28,9 +30,10 @@ function ProxyWagon:updateDataSerialisation()
 	
 	self.data.proxy = self.proxy
 	self.data.inventoryCount = self.inventoryCount
+	self.data.proxyCount = self.proxyCount
 end
 
-function ProxyWagon:updateWagon()
+function ProxyWagon:updateWagon(tick)
 	if(self.proxy ~= nil) then
 		if(self:isMoving() and not self:allowsProxyWhileMoving()) then
 			-- Moving and not allowing proxy while moving, should remove the proxy
@@ -38,7 +41,10 @@ function ProxyWagon:updateWagon()
 			self.proxy = nil
 		else
 			-- Standing still, should update the proxy count
-			self:syncProxyAndInventory()
+			-- But only do it every so often
+			if(tick % 5 == 3) then
+				self:syncProxyAndInventory()
+			end
 		end
 	else
 		if(not self:isMoving() or (self:isMoving() and self:allowsProxyWhileMoving())) then
@@ -81,6 +87,7 @@ function ProxyWagon:createProxy(proxyType, makeOperable)
 	local parentEntity = self.parent
 	if parentEntity ~= nil and parentEntity.valid then
 		self.inventoryCount = -1
+		self.proxyCount = -1
 		
 		local proxyPosition = self:getProxyPosition()
 		debugLog("Creating " .. proxyType .. " at " .. proxyPosition.x .. " " .. proxyPosition.y)
@@ -114,6 +121,7 @@ function ProxyWagon:removeProxy()
 	self:emptyProxy()
 	self.proxy.destroy()
 	self.inventoryCount = -1
+	self.proxyCount = -1
 end
 
 function ProxyWagon:syncProxyAndInventory()
@@ -133,14 +141,17 @@ function ProxyWagon:syncProxyAndInventory()
 		self:copyInventory(wagonInventory, proxyInventory)
 		
 		self.inventoryCount = wagonInventory.getitemcount()
+		self.proxyCount = proxyInventory.getitemcount()
 
 		return true
 	elseif not self:compareInventories(wagonInventory, proxyInventory) then
-		debugLog("currentCount: " .. wagonInventory.getitemcount() .. " previous: " .. self.inventoryCount)
+		debugLog("wagon count: " .. wagonInventory.getitemcount() .. " previous: " .. self.inventoryCount)
+		debugLog("proxy count: " .. proxyInventory.getitemcount() .. " previous: " .. self.proxyCount)
 		debugLog("copy to wagon")
 		self:copyInventory(proxyInventory, wagonInventory)
 		
 		self.inventoryCount = wagonInventory.getitemcount()
+		self.proxyCount = proxyInventory.getitemcount()
 
 		return true
 	end	
@@ -181,7 +192,7 @@ function ProxyWagon:copyInventory(copyFrom, copyTo)
 		end
 
 		for name,diff in pairs(action) do
-			--debugLog("#################itemName: " .. name .. " diff: " .. diff)
+			debugLog("#################itemName: " .. name .. " diff: " .. diff)
 			if diff > 0 then
 				copyTo.insert({name=name,count=diff})
 			elseif diff < 0 then

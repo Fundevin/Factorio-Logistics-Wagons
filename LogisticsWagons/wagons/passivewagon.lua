@@ -10,5 +10,5 @@ end
 
 function PassiveWagon:createProxyType()
 	local proxyType = "lw-logistic-chest-passive-provider-trans"
-	return self:createProxy(proxyType, true)
+	return self:createProxy(proxyType)
 end

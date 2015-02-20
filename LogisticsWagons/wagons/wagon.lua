@@ -49,7 +49,7 @@ function Wagon:__pairs()
         end)
 end
 
-function Wagon:updateWagon()
+function Wagon:updateWagon(tick)
 
 end
 
