@@ -42,9 +42,9 @@ function ProxyWagon:updateWagon(tick)
 		else
 			-- Standing still, should update the proxy count
 			-- But only do it every so often
-			if(tick % 5 == 3) then
+			--if(tick % 500 == 3) then
 				self:syncProxyAndInventory()
-			end
+			--end
 		end
 	else
 		if(not self:isMoving() or (self:isMoving() and self:allowsProxyWhileMoving())) then
@@ -64,7 +64,7 @@ function ProxyWagon:getProxyPosition()
 	local parentEntity = self.parent
 	if(parentEntity ~= nil) then
 		local proxyPosition = parentEntity.position
-		proxyPosition.x = proxyPosition.x
+		proxyPosition.x = proxyPosition.x + 0
 	
 		return proxyPosition
 	end
@@ -136,18 +136,19 @@ function ProxyWagon:syncProxyAndInventory()
 	-- Should be saved, testing copying for now
 		
 	if wagonInventory.getitemcount() ~= self.inventoryCount then
-		debugLog("currentCount: " .. wagonInventory.getitemcount() .. " previous: " .. self.inventoryCount)
-		debugLog("copy to proxy")
+--		debugLog("currentCount: " .. wagonInventory.getitemcount() .. " previous: " .. self.inventoryCount)
+--		debugLog("proxy count: " .. proxyInventory.getitemcount() .. " previous: " .. self.proxyCount)
+--		debugLog("copy to proxy")
 		self:copyInventory(wagonInventory, proxyInventory)
 		
 		self.inventoryCount = wagonInventory.getitemcount()
 		self.proxyCount = proxyInventory.getitemcount()
 
 		return true
-	elseif not self:compareInventories(wagonInventory, proxyInventory) then
-		debugLog("wagon count: " .. wagonInventory.getitemcount() .. " previous: " .. self.inventoryCount)
-		debugLog("proxy count: " .. proxyInventory.getitemcount() .. " previous: " .. self.proxyCount)
-		debugLog("copy to wagon")
+	elseif proxyInventory.getitemcount() ~= self.proxyCount then
+--		debugLog("wagon count: " .. wagonInventory.getitemcount() .. " previous: " .. self.inventoryCount)
+--		debugLog("proxy count: " .. proxyInventory.getitemcount() .. " previous: " .. self.proxyCount)
+--		debugLog("copy to wagon")
 		self:copyInventory(proxyInventory, wagonInventory)
 		
 		self.inventoryCount = wagonInventory.getitemcount()
@@ -156,21 +157,6 @@ function ProxyWagon:syncProxyAndInventory()
 		return true
 	end	
 	return false
-end
-
-function ProxyWagon:compareInventories(inventoryA, inventoryB)
-	if inventoryA.getitemcount() ~= inventoryB.getitemcount() then
-		return false
-	else
-		local contentsA = inventoryA.getcontents()
-		local contentsB = inventoryB.getcontents()
-		for name, count in pairs(contentsA) do
-			if contentsB[name] == nil or contentsB[name] ~= count then
-				return false
-			end
-		end
-	end
-	return true
 end
 
 function ProxyWagon:copyInventory(copyFrom, copyTo)
@@ -192,7 +178,7 @@ function ProxyWagon:copyInventory(copyFrom, copyTo)
 		end
 
 		for name,diff in pairs(action) do
-			debugLog("#################itemName: " .. name .. " diff: " .. diff)
+--			debugLog("#################itemName: " .. name .. " diff: " .. diff)
 			if diff > 0 then
 				copyTo.insert({name=name,count=diff})
 			elseif diff < 0 then
