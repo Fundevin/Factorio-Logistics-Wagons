@@ -34,7 +34,7 @@ function ProxyWagon:updateDataSerialisation()
 end
 
 function ProxyWagon:updateWagon(tick)
-	debugLog("ProxyWagon:updateWagon")
+--	debugLog("ProxyWagon:updateWagon")
 	if(self.proxy ~= nil) then
 		if(self:isMoving() and not self:allowsProxyWhileMoving()) then
 			-- Moving and not allowing proxy while moving, should remove the proxy
@@ -45,6 +45,7 @@ function ProxyWagon:updateWagon(tick)
 			-- But only do it every so often
 			--if(tick % 500 == 3) then
 				self:syncProxyAndInventory()
+				self:syncFilters()
 			--end
 		end
 	else
@@ -66,6 +67,7 @@ function ProxyWagon:getProxyPosition()
 	if(parentEntity ~= nil) then
 		local proxyPosition = parentEntity.position
 		proxyPosition.x = proxyPosition.x + 0
+		proxyPosition.y = proxyPosition.y - 1
 	
 		return proxyPosition
 	end
@@ -103,6 +105,8 @@ function ProxyWagon:createProxy(proxyType, makeOperable)
 	else
 		self.proxy = nil
 	end
+	
+	debugLog("Proxy created: " .. serpent.dump(self.proxy))
 end
 
 function ProxyWagon:emptyProxy()
@@ -123,16 +127,32 @@ function ProxyWagon:removeProxy()
 	self.proxyCount = -1
 end
 
-function ProxyWagon:syncProxyAndInventory()
+function ProxyWagon:syncFilters()
 	if self.proxy == nil or not self.proxy.valid then
-		debugLog("Proxy does not exist. something is wrong, we should not be here")
-		--glob.logisticWagons[wagon]["proxy"] = nil
 		return
 	end
+	
 	local wagonInventory = self.parent.getinventory(1)
 	local proxyInventory = self.proxy.getinventory(1)
+
+	if wagonInventory.getbar() ~= self.inventoryBar then
+		proxyInventory.setbar(wagonInventory.getbar())
+	elseif proxyInventory.getbar() ~= self.proxyBar then
+		wagonInventory.setbar(proxyInventory.getbar())
+	end
 	
-	-- Should be saved, testing copying for now
+	self.inventoryBar = wagonInventory.getbar()
+	self.proxyBar = proxyInventory.getbar()
+end
+
+function ProxyWagon:syncProxyAndInventory()
+	if self.proxy == nil or not self.proxy.valid then
+		debugLog("Proxy does not exist. Something is wrong, we should not be here")
+		return
+	end
+	
+	local wagonInventory = self.parent.getinventory(1)
+	local proxyInventory = self.proxy.getinventory(1)
 		
 	if wagonInventory.getitemcount() ~= self.inventoryCount then
 --		debugLog("currentCount: " .. wagonInventory.getitemcount() .. " previous: " .. self.inventoryCount)
