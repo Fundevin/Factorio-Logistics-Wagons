@@ -17,13 +17,12 @@ end
 
 function RequesterWagon:updateWagon(tick)
 	ProxyWagon.updateWagon(self,tick)
+	self:updateRequestSlots()
 end
 
 function RequesterWagon:updateDataSerialisation()
 	ProxyWagon.updateDataSerialisation(self)
-	
-	self:updateRequestSlots()
-	
+		
 	self.data.requestSlots = self.requestSlots
 end
 
@@ -44,7 +43,7 @@ function RequesterWagon:updateRequestSlots()
 		local slots = {}
 		while i < 10 do
 			i = i + 1
-			
+						
 			slots[i] = self.proxy.getrequestslot(i)
 			if slots[i] == nil then
 				slots[i] = {}
@@ -57,14 +56,15 @@ end
 function RequesterWagon:setRequestSlots()
 	if self.proxy ~= nil and self.requestSlots ~= {} then
 		local i = 0
-		local slots = {}
+		local slots = self.requestSlots
 		while i < 10 do
 			i = i + 1
 			
-			if slots[i] == nil or slots[i] == {} then
+			if slots[i] == nil or next(slots[i]) == nil then
 				self.proxy.clearrequestslot(i)				
 			else
-				self.proxy.setrequestslot(i, slots[i])				
+				debugLog("Setting request slot to: " .. serpent.dump(slots[i]))
+				self.proxy.setrequestslot(slots[i],i)
 			end
 		end
 		self.requestSlots = slots
