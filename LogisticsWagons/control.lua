@@ -37,28 +37,24 @@ game.onevent(defines.events.onrobotpremined, function(event) onentityremoved(eve
 game.onevent(defines.events.ontick, function(event) ontick(event) end)
 
 function oninit()
---	debugLog("init")
+	debugLog("init")
 	glob.logisticWagons = glob.logisticWagons or {}
 end
 
 function onload()
---	debugLog("load")
+	debugLog("load")
 	glob.logisticWagons = glob.logisticWagons or {}
 	
 	for i,wagon in pairs(glob.logisticWagons) do	
---		debugLog("Loaded wagon: " .. i .. " - " .. serpent.dump(wagon))
-		if wagon.wagonType == "Wagon" then
---			glob.logisticWagons[i] = Wagon:new(wagon.parent,wagon)
-		elseif wagon.wagonType == "PassiveWagon" then
-			glob.logisticWagons[i] = PassiveWagon:new(wagon.parent,wagon)
-		end
+		debugLog("Loaded wagon: " .. i .. " - " .. serpent.dump(wagon))
+		glob.logisticWagons[i] = _G[wagon.wagonType]:new(wagon.parent,wagon)
 	end
 end
 
 function ontick(event)
 --	debugLog("tick")
 	for i,wagon in pairs(glob.logisticWagons) do
-		wagon:updateWagon()
+		wagon:updateWagon(event.tick)
 	end
 end
 
