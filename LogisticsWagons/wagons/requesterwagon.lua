@@ -9,7 +9,7 @@ function RequesterWagon:initialize(parent,data)
 	self.wagonType = "RequesterWagon"
 	
 	if(data ~= nil) then
-		debugLog("Need to check the requester slots")
+		self.requestSlots = data.requestSlots
 	else
 		self.requestSlots = {}
 	end
@@ -54,7 +54,7 @@ function RequesterWagon:updateRequestSlots()
 end
 
 function RequesterWagon:setRequestSlots()
-	if self.proxy ~= nil and self.requestSlots ~= {} then
+	if self.proxy ~= nil and self.requestSlots ~= nil and self.requestSlots ~= {} then
 		local i = 0
 		local slots = self.requestSlots
 		while i < 10 do
