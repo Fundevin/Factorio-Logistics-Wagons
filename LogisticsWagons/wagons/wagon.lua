@@ -54,12 +54,12 @@ function Wagon:updateWagon(tick)
 end
 
 function Wagon:isMoving()
-	return self:getSpeed() > 0
+	return self:getSpeed() > 0.05
 end
 
 function Wagon:getSpeed()
 	if (self.parent and self.parent.train) then
-		return self.parent.train.speed
+		return math.abs(self.parent.train.speed)
 	else
 		return 0
 	end
