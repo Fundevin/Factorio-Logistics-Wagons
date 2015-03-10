@@ -54,7 +54,7 @@ function Wagon:updateWagon(tick)
 end
 
 function Wagon:isMoving()
-	return self:getSpeed() > 0.05
+	return self:getSpeed() > 0
 end
 
 function Wagon:getSpeed()
